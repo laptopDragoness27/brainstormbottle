@@ -17,7 +17,7 @@ def remove(name,labelthing):
 def result():
     ideaslist.append(email_entry.get())
     label = ttk.Label(form_frame, text=ideaslist[-1])
-    closebutton = ttk.Button(form_frame, text="X", command= lambda:remove(closebutton, label))
+    closebutton = ttk.Button(form_frame,width=2, text="X", command= lambda:remove(closebutton, label))
     closebutton.grid(column=1, row=len(ideaslist) + 1, columnspan=3)
     label.grid(column=0, row=len(ideaslist) + 1, columnspan=3)
     ideasSym.append(closebutton)
