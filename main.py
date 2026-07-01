@@ -7,17 +7,30 @@ root.title('Brainstorm in a Bottle')
 
 ideaslist = []
 ideasSym = []
+ideasRem = []
+
+def remove(name,labelthing):
+    name.destroy()
+    labelthing.destroy()
+    
 
 def result():
     ideaslist.append(email_entry.get())
-    ideasSym.append(ttk.Label(root,text=ideaslist[-1]).grid(column=0,row=len(ideaslist)+1))
+    label = ttk.Label(form_frame, text=ideaslist[-1])
+    closebutton = ttk.Button(form_frame, text="X", command= lambda:remove(closebutton, label))
+    closebutton.grid(column=1, row=len(ideaslist) + 1, columnspan=3)
+    label.grid(column=0, row=len(ideaslist) + 1, columnspan=3)
+    ideasSym.append(closebutton)
+    ideasRem.append(label)
 
 
-email_entry = ttk.Entry(root, width=80)
-email_entry.grid(column=0,row=0,sticky="nsew")
+form_frame = ttk.Frame(root)
+form_frame.place(relx=0.5, rely=0, anchor="n")
 
-enterButton = ttk.Button(root, text="enter", command=result).grid(column=0,row=1,sticky="nsew")
-
-root.grid_columnconfigure(0, weight=1)
+ttk.Label(form_frame, text="enter your ideas below:").grid(column=0, row=0, padx=(0, 6))
+email_entry = ttk.Entry(form_frame, width=50)
+email_entry.grid(column=1, row=0, padx=6)
+enterButton = ttk.Button(form_frame, text="enter", command=result)
+enterButton.grid(column=2, row=0, padx=(6, 0))
 
 root.mainloop()
