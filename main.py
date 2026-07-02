@@ -16,15 +16,17 @@ def result():
     #add the entered value to the list of ideas
     ideaslist.append(email_entry.get())
     #create a label from the latest idea in the list, put it on 1 lower than the length of the idea list so it's in the right place
-    label = ttk.Label(form_frame, text=ideaslist[-1])
+    label = ttk.Label(list_frame, text=ideaslist[-1])
     label.grid(column=1, row=len(ideaslist) + 1, pady=10)
     #create the button to get rid of the item in the list 20 to the right and -3 up relative to the label
-    closebutton = ttk.Button(form_frame,width=2, text="X", command= lambda:remove(closebutton, label))
+    closebutton = ttk.Button(list_frame,width=2, text="X", command= lambda:remove(closebutton, label))
     closebutton.place(in_=label,relx=1.0, x=20, y=-3)
 
 #creates a frame to work with that is centered.
 form_frame = ttk.Frame(root)
 form_frame.place(relx=0.5, rely=0, anchor="n")
+list_frame = ttk.Frame(root, width=8000, padding=(100,0))
+list_frame.place(relx=0.5, rely=0, anchor="n", y=40)
 
 #label placed to the left of the entry box
 ttk.Label(form_frame, text="enter your ideas below:").grid(column=0, row=0, padx=(0, 6))
