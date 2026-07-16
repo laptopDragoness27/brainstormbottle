@@ -10,6 +10,7 @@ root.title('Brainstorm in a Bottle')
 
 global ideaslist
 ideaslist = []
+global labellist
 labellist = []
 
 undonelist = []
@@ -19,15 +20,18 @@ undonelist = []
 
 
 def undo(event=None):
+    global labellist
+    global undonelist
     if len(undonelist)>0:
-        if undonelist[-1][0]=="del":
-            remove(undonelist[-1][1], False)
-        elif undonelist[-1][0]=="add":
-            addlistitem(undonelist[-1][1], False)
-            moveup(labellist, undonelist[-1][2]-1)
+        restatelist(labellist,undonelist[-1])
+        labellist = undonelist[-1]
+        ideaslist = []
+        for x in labellist:
+            ideaslist.append(x.cget("text"))
 
-        undonelist.pop(-1)
+        del undonelist[-1]
         print(undonelist)
+        
     else:
         print("nothing to undo")
 
@@ -95,17 +99,21 @@ savename = ""
 nameentry = None
 
 def remove(labelthing,remember):
-    print(ideaslist)
-    undonelist.append(["add",labelthing.cget("text")])
-    labellist.pop(labellist.index(labelthing))
-    ideaslist.pop(ideaslist.index(labelthing.cget("text")))
+    
+    if remember:
+        undonelist.append(labellist[:])
+    print(undonelist)
+    labellist.remove(labelthing)
+    ideaslist.remove(labelthing.cget("text"))
     labelthing.destroy()
 
 #this function adds the string in the input as a new idea in the list visible to the user
 def addlistitem(ideaname,remember):
     
     #create a label from the latest idea in the list, put it on 1 lower than the length of the idea list so it's in the right place
-    
+    if remember:
+        undonelist.append(labellist[:])
+        print(undonelist)
     label = ttk.Label(list_frame, text=ideaname)
     if len(labellist)==0:
         label.grid(column=1, row=len(labellist), pady=10, sticky="ew")
@@ -126,8 +134,7 @@ def addlistitem(ideaname,remember):
     changeplaced.place(in_=changeplaceu,relx=0.0, x=-45)
 
     #adds newly added item to undo list to be undone later
-    if remember:
-        undonelist.append(["del",label,len(ideaslist)-1])
+
 
     #recentres all the items
     root.columnconfigure(0, weight=1)
@@ -163,6 +170,22 @@ def movedown(oglist, indexofmoved):
         
         # Make columns expand
         root.columnconfigure(0, weight=1)
+
+def restatelist(oglist,newlist):
+    global labellist
+    # Clear all labels from grid
+    for x in reversed(oglist):
+        x.grid_forget()
+        del labellist[-1]
+    
+    # Re-grid labels in new order
+    if len(newlist)>0:
+        for idx, lbl in enumerate(newlist):
+            print(lbl)
+            addlistitem(lbl.cget("text"),False)
+    
+    # Make columns expand
+    root.columnconfigure(0, weight=1)
 
 #creates a frame to work with that is centered.
 form_frame = ttk.Frame(root)
