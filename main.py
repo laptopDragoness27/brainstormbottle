@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
 import json
-import os, os.path
 
 root = tk.Tk()
 root.geometry('800x600')
@@ -15,23 +14,11 @@ labellist = []
 
 undonelist = []
 
-#bug writeup
-#the undo function is getting kind of complicated right now, my idea is to rewrite it to fully save the state of ideaslist and labellist each time and just fully reset it, that's easier to deal with when new features are added anyays (ie: editing)
-
-
 def undo(event=None):
-    global labellist
-    global undonelist
-    if len(undonelist)>0:
-        restatelist(labellist,undonelist[-1])
-        labellist = undonelist[-1]
-        ideaslist = []
-        for x in labellist:
-            ideaslist.append(x.cget("text"))
-
-        del undonelist[-1]
-        print(undonelist)
-        
+    global ideaslist
+    if undonelist:
+        ideaslist = undonelist.pop()
+        redraw()
     else:
         print("nothing to undo")
 
@@ -89,6 +76,11 @@ menubar.add_command(
     label="Load",
     command=load
 )
+#adds undo button
+menubar.add_command(
+    label="Undo",
+    command=undo
+)
 #adds exit button
 menubar.add_command(
     label="Exit",
@@ -98,22 +90,20 @@ menubar.add_command(
 savename = ""
 nameentry = None
 
+
 def remove(labelthing,remember):
-    
+    global ideaslist
     if remember:
-        undonelist.append(labellist[:])
-    print(undonelist)
-    labellist.remove(labelthing)
+        undonelist.append(ideaslist.copy())
     ideaslist.remove(labelthing.cget("text"))
-    labelthing.destroy()
+    redraw()
 
 #this function adds the string in the input as a new idea in the list visible to the user
 def addlistitem(ideaname,remember):
     
     #create a label from the latest idea in the list, put it on 1 lower than the length of the idea list so it's in the right place
     if remember:
-        undonelist.append(labellist[:])
-        print(undonelist)
+        undonelist.append(ideaslist[:])
     label = ttk.Label(list_frame, text=ideaname)
     if len(labellist)==0:
         label.grid(column=1, row=len(labellist), pady=10, sticky="ew")
@@ -123,8 +113,8 @@ def addlistitem(ideaname,remember):
     closebutton = ttk.Button(list_frame,width=2, text="X", command= lambda:remove(label, True))
     closebutton.place(in_=label,relx=1.0, x=20, y=-3)
 
-    ideaslist.append(ideaname)
     labellist.append(label)
+    ideaslist.append(ideaname)
 
     #make button to move item up
     changeplaceu=ttk.Button(list_frame, text="↑", command=lambda:moveup(labellist, labellist.index(label)), width=2)
@@ -136,17 +126,29 @@ def addlistitem(ideaname,remember):
     #adds newly added item to undo list to be undone later
 
 
+    
+
+def redraw():
+    global labellist
+    for w in list_frame.winfo_children():
+        w.destroy()
+    labellist.clear()
+    current=ideaslist.copy()
+    ideaslist.clear()
+    for idea in current:
+        addlistitem(idea, False)
+
     #recentres all the items
     root.columnconfigure(0, weight=1)
 
 def result():
     if email_entry.get()!="":
         #add the entered value to the list of ideas
-        ideaslist.append(email_entry.get())
         addlistitem(email_entry.get(), True)
 
 def moveup(oglist,itemindex):
     if itemindex!=0:
+        undonelist.append(ideaslist.copy())
         oglist.insert(itemindex-1,oglist.pop(itemindex))
         # Clear all labels from grid
         for x in range(len(oglist)):
@@ -159,6 +161,7 @@ def moveup(oglist,itemindex):
 
 def movedown(oglist, indexofmoved):
     if indexofmoved!=len(oglist)-1:
+        undonelist.append(ideaslist.copy())
         oglist.insert(indexofmoved+1,oglist.pop(indexofmoved))
         # Clear all labels from grid
         for x in range(len(oglist)):
@@ -170,22 +173,6 @@ def movedown(oglist, indexofmoved):
         
         # Make columns expand
         root.columnconfigure(0, weight=1)
-
-def restatelist(oglist,newlist):
-    global labellist
-    # Clear all labels from grid
-    for x in reversed(oglist):
-        x.grid_forget()
-        del labellist[-1]
-    
-    # Re-grid labels in new order
-    if len(newlist)>0:
-        for idx, lbl in enumerate(newlist):
-            print(lbl)
-            addlistitem(lbl.cget("text"),False)
-    
-    # Make columns expand
-    root.columnconfigure(0, weight=1)
 
 #creates a frame to work with that is centered.
 form_frame = ttk.Frame(root)
