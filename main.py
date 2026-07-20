@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk,font,PhotoImage
 from tkinter import filedialog
 import json
 
@@ -13,6 +13,15 @@ global labellist
 labellist = []
 
 undonelist = []
+
+#sets the font
+defaultFont = font.nametofont("TkDefaultFont")
+defaultFont.configure(family="Times New Roman",size=10,weight=font.NORMAL)
+root.option_add("*Font", "TkDefaultFont")
+
+binpic = tk.PhotoImage(file="bin.png").subsample(16,16)
+uparrow = tk.PhotoImage(file="uparrow.png").subsample(160,160)
+downarrow = tk.PhotoImage(file="downarrow.png").subsample(40,40)
 
 def undo(event=None):
     global ideaslist
@@ -110,23 +119,21 @@ def addlistitem(ideaname,remember):
     else:
         label.grid(column=1, row=len(labellist) + 1, pady=10, sticky="ew")
     #create the button to get rid of the item in the list 20 to the right and -3 up relative to the label
-    closebutton = ttk.Button(list_frame,width=2, text="X", command= lambda:remove(label, True))
+    closebutton = ttk.Button(list_frame,width=2, text="D", image=binpic, command= lambda:remove(label, True))
     closebutton.place(in_=label,relx=1.0, x=20, y=-3)
 
     labellist.append(label)
     ideaslist.append(ideaname)
 
     #make button to move item up
-    changeplaceu=ttk.Button(list_frame, text="↑", command=lambda:moveup(labellist, labellist.index(label)), width=2)
+    changeplaceu=ttk.Button(list_frame, image=uparrow, command=lambda:moveup(labellist, labellist.index(label)), width=2)
     changeplaceu.place(in_=label,relx=0.0, x=-45, y=-3)
     #make button to move item down
-    changeplaced=ttk.Button(list_frame, text="↓", command=lambda:movedown(labellist, labellist.index(label)), width=2)
+    changeplaced=ttk.Button(list_frame, image=downarrow, command=lambda:movedown(labellist, labellist.index(label)), width=2)
     changeplaced.place(in_=changeplaceu,relx=0.0, x=-45)
 
-    #adds newly added item to undo list to be undone later
-
-
-    
+    #changeplaced=ttk.Button(list_frame, text="✎", command=lambda:edit(label), width=2)
+    #changeplaced.place(in_=closebutton,relx=1.0, x=18)
 
 def redraw():
     global labellist
