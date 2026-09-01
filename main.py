@@ -14,10 +14,18 @@ labellist = []
 
 undonelist = []
 
+# stolen code that allows for dynamic text wrapping
+def update_text_height(label):
+    # Update the height of the text widget to fit the content
+    text_widget=label
+    lines = len(label.get('1.0','end'))//50+1
+    root.after(10, lambda: text_widget.configure(height=lines))
+
 #sets the font
 defaultFont = font.nametofont("TkDefaultFont")
 defaultFont.configure(family="Times New Roman",size=10,weight=font.NORMAL)
 root.option_add("*Font", "TkDefaultFont")
+
 
 #subsample shrinks the x and y proportions down by that multiple, equal to that dimesion's size divided by 15
 binpic = tk.PhotoImage(file="bin.png").subsample(16,16)
@@ -82,13 +90,17 @@ def exit():
     tk.Button(canvas,text="no (save)",command=save).pack()
 
 def edit(label):
-    if label.state() == ("readonly",):
-        label.state(["!readonly"])
+    if label.cget("state") == "disabled":
+        label.configure(state="normal")
     else:
         undonelist.append(ideaslist.copy())
-        label.state(["readonly"])
-        ideaslist[labellist.index(label)] = label.get()
-        return label
+        label.configure(state="disabled")
+        ideaslist[labellist.index(label)] = label.get('1.0','end')
+        if len(label.get('1.0','end'))==1:
+            remove(label,False)
+            return
+        update_text_height(label)
+        
 
 #adds save button
 menubar.add_command(
@@ -119,7 +131,7 @@ def remove(labelthing,remember):
     global ideaslist
     if remember:
         undonelist.append(ideaslist.copy())
-    ideaslist.remove(labelthing.get())
+    ideaslist.remove(labelthing.get('1.0','end'))
     redraw()
 
 #this function adds the string in the input as a new idea in the list visible to the user
@@ -127,14 +139,15 @@ def addlistitem(ideaname,remember):
     #create a label from the latest idea in the list, put it on 1 lower than the length of the idea list so it's in the right place
     if remember:
         undonelist.append(ideaslist[:])
-
-    label = ttk.Entry(list_frame, width=50)
-    label.insert(0,str(ideaname))
-    label.state(["readonly"])
+    label = tk.Text(list_frame, width=50, height=1, wrap="word")
+    label.insert('1.0',str(ideaname))
+    update_text_height(label)
+    label.configure(state="disabled")
     if len(labellist)==0:
         label.grid(column=1, row=len(labellist), pady=10, sticky="ew")
     else:
         label.grid(column=1, row=len(labellist) + 1, pady=10, sticky="ew")
+    
     #create the button to get rid of the item in the list 20 to the right and -3 up relative to the label
     closebutton = ttk.Button(list_frame,width=2, text="D", image=binpic, command= lambda:remove(label, True))
     closebutton.place(in_=label,relx=1.0, x=20, y=-3)
@@ -142,7 +155,7 @@ def addlistitem(ideaname,remember):
     labellist.append(label)
     labellist[-1]=label
     ideaslist.append(ideaname)
-    ideaslist[-1]=label.get()
+    ideaslist[-1]=label.get('1.0','end')
 
     #make button to move item up
     changeplaceu=ttk.Button(list_frame, image=uparrow, command=lambda:moveup(labellist, labellist.index(label)), width=2)
@@ -151,8 +164,11 @@ def addlistitem(ideaname,remember):
     changeplaced=ttk.Button(list_frame, image=downarrow, command=lambda:movedown(labellist, labellist.index(label)), width=2)
     changeplaced.place(in_=changeplaceu,relx=0.0, x=-45)
 
-    changeplaced=ttk.Button(list_frame, image=pencil, command=lambda:edit(label), width=2)
-    changeplaced.place(in_=closebutton,relx=1.0, x=18)
+    editbutton=ttk.Button(list_frame, image=pencil, command=lambda:edit(label), width=2)
+    editbutton.place(in_=closebutton,relx=1.0, x=18)
+
+    tup = ("Inconsolata", 10)  # Define font
+    label.configure(font=tup)  # Apply font
 
 def redraw():
     global labellist
