@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk,font,PhotoImage
+from tkinter import StringVar, ttk,font,PhotoImage,Entry
 from tkinter import filedialog
 import json
 
@@ -19,9 +19,11 @@ defaultFont = font.nametofont("TkDefaultFont")
 defaultFont.configure(family="Times New Roman",size=10,weight=font.NORMAL)
 root.option_add("*Font", "TkDefaultFont")
 
+#subsample shrinks the x and y proportions down by that multiple, equal to that dimesion's size divided by 15
 binpic = tk.PhotoImage(file="bin.png").subsample(16,16)
 uparrow = tk.PhotoImage(file="uparrow.png").subsample(160,160)
 downarrow = tk.PhotoImage(file="downarrow.png").subsample(40,40)
+pencil = tk.PhotoImage(file="pencil.png").subsample(64,64)
 
 def undo(event=None):
     global ideaslist
@@ -52,15 +54,19 @@ def finalsave():
         #saves the current list in its current order as a json file, with the name written by the user
         if nameentry.get()!="":
              with open((nameentry.get()+".json"), mode="w", encoding="utf-8") as write_file:json.dump(ideaslist, write_file)
-        closewindow=True
 
 def load():
     file_path = filedialog.askopenfilename(title="Select list file", filetypes=[("JSON file", ('*.json'))])
     if file_path!=None:
+        #removes all the current entries to make way for the ones loaded in, if there's stuff to remove
+        if len(labellist)>0:
+            for y in range(len(labellist),-1,-1):
+                labellist[y-1].destroy()
+        #opens json file and creates a list entry for each idea in the json file 
         with open(file_path, "r") as f:
             ideaslist=json.load(f)
             for x in range(len(ideaslist)):
-                addlistitem(ideaslist[x])
+                addlistitem(ideaslist[x],False)
 
 #creates a menu to load and save in
 menubar=tk.Menu(root)
@@ -74,6 +80,15 @@ def exit():
     tk.Label(canvas,text="did you remember to save?").pack()
     tk.Button(canvas,text="yes (exit)",command=root.destroy).pack()
     tk.Button(canvas,text="no (save)",command=save).pack()
+
+def edit(label):
+    if label.state() == ("readonly",):
+        label.state(["!readonly"])
+    else:
+        undonelist.append(ideaslist.copy())
+        label.state(["readonly"])
+        ideaslist[labellist.index(label)] = label.get()
+        return label
 
 #adds save button
 menubar.add_command(
@@ -104,16 +119,18 @@ def remove(labelthing,remember):
     global ideaslist
     if remember:
         undonelist.append(ideaslist.copy())
-    ideaslist.remove(labelthing.cget("text"))
+    ideaslist.remove(labelthing.get())
     redraw()
 
 #this function adds the string in the input as a new idea in the list visible to the user
 def addlistitem(ideaname,remember):
-    
     #create a label from the latest idea in the list, put it on 1 lower than the length of the idea list so it's in the right place
     if remember:
         undonelist.append(ideaslist[:])
-    label = ttk.Label(list_frame, text=ideaname)
+
+    label = ttk.Entry(list_frame, width=50)
+    label.insert(0,str(ideaname))
+    label.state(["readonly"])
     if len(labellist)==0:
         label.grid(column=1, row=len(labellist), pady=10, sticky="ew")
     else:
@@ -123,7 +140,9 @@ def addlistitem(ideaname,remember):
     closebutton.place(in_=label,relx=1.0, x=20, y=-3)
 
     labellist.append(label)
+    labellist[-1]=label
     ideaslist.append(ideaname)
+    ideaslist[-1]=label.get()
 
     #make button to move item up
     changeplaceu=ttk.Button(list_frame, image=uparrow, command=lambda:moveup(labellist, labellist.index(label)), width=2)
@@ -132,8 +151,8 @@ def addlistitem(ideaname,remember):
     changeplaced=ttk.Button(list_frame, image=downarrow, command=lambda:movedown(labellist, labellist.index(label)), width=2)
     changeplaced.place(in_=changeplaceu,relx=0.0, x=-45)
 
-    #changeplaced=ttk.Button(list_frame, text="✎", command=lambda:edit(label), width=2)
-    #changeplaced.place(in_=closebutton,relx=1.0, x=18)
+    changeplaced=ttk.Button(list_frame, image=pencil, command=lambda:edit(label), width=2)
+    changeplaced.place(in_=closebutton,relx=1.0, x=18)
 
 def redraw():
     global labellist
