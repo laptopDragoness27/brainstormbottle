@@ -10,7 +10,9 @@ Requirements:
 
 -be able to easily remove items that you added to your list [COMPLETE]
 
--be able to undo any action you perform
+-be able to undo any action you perform [COMPLETE]
+
+-be able to edit items in the list after you made them [COMPLETE]
 
 -look nice
 
