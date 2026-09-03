@@ -14,6 +14,18 @@ labellist = []
 
 undonelist = []
 
+def updatecolor(label):
+    rank=label.grid_info()['row']
+    
+    if rank == 0:
+        label.config(bg='gold')
+    elif rank==2:
+        label.config(bg='silver')
+    elif rank==3:
+        label.config(bg='#cd7f32')
+    else:
+        label.config(bg="#fc8996")
+
 # stolen code that allows for dynamic text wrapping
 def update_text_height(label):
     # Update the height of the text widget to fit the content
@@ -147,6 +159,7 @@ def addlistitem(ideaname,remember):
         label.grid(column=1, row=len(labellist), pady=10, sticky="ew")
     else:
         label.grid(column=1, row=len(labellist) + 1, pady=10, sticky="ew")
+    updatecolor(label)
     
     #create the button to get rid of the item in the list 20 to the right and -3 up relative to the label
     closebutton = ttk.Button(list_frame,width=2, text="D", image=binpic, command= lambda:remove(label, True))
