@@ -10,4 +10,6 @@ Features:
 
 -save and load functions to easily remember what you think of
 
+Note: THERE IS ONLY A LINUX RELEASE CURRENTLY sorry windows users, I'll figure it out later I promise
+
 This app is not perfecat and will most certainly bug a bit. It is my first time working with tkinter so it is a bit janky. I hope it's helpful to somebody though
