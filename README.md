@@ -1,19 +1,13 @@
 Brainstorm in a Bottle: an application to help organise, sort, and decide upon ideas to help with brainstorming.
 
-Requirements:
+Features:
 
--be able to add items to a list of ideas [COMPLETE]
+-somewhat nice looking UI
 
--be able to sort the items by dragging them with the cursor in a chosen order [COMPLETE*]
+-write, edit and rank various ideas of yours easily
 
--be able to save the lists you make [COMPLETE]
+-undo function when you change your mind
 
--be able to easily remove items that you added to your list [COMPLETE]
+-save and load functions to easily remember what you think of
 
--be able to undo any action you perform [COMPLETE]
-
--be able to edit items in the list after you made them [COMPLETE]
-
--look nice
-
-*been modified to be more easily done
+This app is not perfecat and will most certainly bug a bit. It is my first time working with tkinter so it is a bit janky. I hope it's helpful to somebody though
